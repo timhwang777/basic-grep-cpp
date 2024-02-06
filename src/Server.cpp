@@ -2,6 +2,15 @@
 #include <string>
 #include <cctype>
 
+bool match_alphanumeric(const std::string& inputs, const std::string& pattern) {
+   for(auto input : inputs) {
+        if (isalpha(input) || isdigit(input) || input == '_') {
+            return true;
+        }
+   }
+   return false;
+}
+
 bool match_digits(const std::string& inputs, const std::string& pattern) {
     for (auto input : inputs) {
         if (isdigit(input)) {
@@ -17,6 +26,9 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     }
     else if (pattern == "\\d") {
         return match_digits(input_line, pattern);
+    }
+    else if (pattern == "\\w") {
+        return match_alphanumeric(input_line, pattern);
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
