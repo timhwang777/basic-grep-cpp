@@ -1,9 +1,22 @@
 #include <iostream>
 #include <string>
+#include <cctype>
+
+bool match_digits(const std::string& inputs, const std::string& pattern) {
+    for (auto input : inputs) {
+        if (isdigit(input)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
     if (pattern.length() == 1) {
         return input_line.find(pattern) != std::string::npos;
+    }
+    else if (pattern == "\\d") {
+        return match_digits(input_line, pattern);
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
