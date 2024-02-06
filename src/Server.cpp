@@ -3,6 +3,16 @@
 #include <cctype>
 #include <unordered_set>
 
+bool match_negative_char(const std::string& inputs, const std::string& pattern) {
+    std::unordered_set<char> neg_pattern_set(pattern.begin(), pattern.end());
+    for (auto input : inputs) {
+        if (neg_pattern_set.find(input) != neg_pattern_set.end()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool match_positive_char(const std::string& inputs, const std::string& pattern) {
     std::unordered_set<char> pattern_set(pattern.begin(), pattern.end());
     for (auto input : inputs) {
@@ -12,6 +22,17 @@ bool match_positive_char(const std::string& inputs, const std::string& pattern) 
     }
     return false;
 }
+
+// Match group wrapper
+bool match_group(const std::string& inputs, const std::string& pattern) {
+    if (pattern.front() == '^') {
+        return match_negative_char(inputs, pattern.substr(1));
+    }
+    else {
+        return match_positive_char(inputs, pattern);
+    }
+}
+
 bool match_alphanumeric(const std::string& inputs, const std::string& pattern) {
    for(auto input : inputs) {
         if (isalpha(input) || isdigit(input) || input == '_') {
@@ -45,7 +66,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         if (pattern.size() > 2) {
             trim_pattern = pattern.substr(1, pattern.size() - 2);
         }
-        return match_positive_char(input_line, trim_pattern);
+        return match_group(input_line, trim_pattern);
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
