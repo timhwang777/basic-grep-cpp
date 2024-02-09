@@ -62,6 +62,9 @@ bool match_pattern_helper(const std::string& input_line, const std::string& patt
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
+    if (pattern.length() == 1) {
+        return input_line.find(pattern) != std::string::npos;
+    }
 	return match_pattern_helper(input_line, pattern, 0, 0);
 }
 
