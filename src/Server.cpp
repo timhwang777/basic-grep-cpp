@@ -3,74 +3,66 @@
 #include <cctype>
 #include <unordered_set>
 
-bool match_negative_char(const std::string& inputs, const std::string& pattern) {
-    std::unordered_set<char> neg_pattern_set(pattern.begin(), pattern.end());
-    for (auto input : inputs) {
-        if (neg_pattern_set.find(input) != neg_pattern_set.end()) {
-            return false;
-        }
-    }
-    return true;
+bool match_digit(const char c) {
+	return std::isdigit(c);
 }
 
-bool match_positive_char(const std::string& inputs, const std::string& pattern) {
-    std::unordered_set<char> pattern_set(pattern.begin(), pattern.end());
-    for (auto input : inputs) {
-        if (pattern_set.find(input) != pattern_set.end()) {
-            return true;
-        }
-    }
-    return false;
+bool match_alphanumeric(const char c) {
+	return std::isalnum(c);
 }
 
-// Match group wrapper
-bool match_group(const std::string& inputs, const std::string& pattern) {
-    if (pattern.front() == '^') {
-        return match_negative_char(inputs, pattern.substr(1));
-    }
-    else {
-        return match_positive_char(inputs, pattern);
-    }
+bool match_group(const char c, const std::string& pattern, size_t& pattern_idx) {
+	bool negated = pattern[pattern_idx + 1] == '^' ; 
+	bool match = false;
+
+	size_t closing_bracket_pos = pattern.find(']', pattern_idx);
+	for (int i = pattern_idx + 1 + negated; i < closing_bracket_pos; i++) {
+		if (c == pattern[i]) {
+			match = true;
+			break;
+		}
+	}
+	pattern_idx = closing_bracket_pos;
+
+	return negated ? !match : match;
 }
 
-bool match_alphanumeric(const std::string& inputs, const std::string& pattern) {
-   for(auto input : inputs) {
-        if (isalpha(input) || isdigit(input) || input == '_') {
-            return true;
-        }
-   }
-   return false;
+bool matches(char c, const std::string& pattern, size_t& pattern_idx) {
+	if (pattern[pattern_idx] == '\\') {
+		if (pattern_idx + 1 < pattern.size()) {
+			pattern_idx++; // Skip the '\';
+			if (pattern[pattern_idx] == 'd') return match_digit(c);
+			if (pattern[pattern_idx] == 'w') return match_alphanumeric(c);
+		}
+	}
+	else if (pattern[pattern_idx] == '[') {
+		return match_group(c, pattern, pattern_idx);
+	}
+	else {
+		return c == pattern[pattern_idx];
+	}
+
+	pattern_idx++; // Move to the next character in the pattern
+	return false;
 }
 
-bool match_digits(const std::string& inputs, const std::string& pattern) {
-    for (auto input : inputs) {
-        if (isdigit(input)) {
-            return true;
-        }
-    }
-    return false;
+bool match_pattern_helper(const std::string& input_line, const std::string& pattern, size_t input_line_idx, size_t pattern_idx) {
+	if (input_line_idx == input_line.length() && pattern_idx == pattern.length()) {
+		return true; // Both input and pattern are fully matched
+	}
+	if (pattern_idx == pattern.length()) {
+		return false; // Pattern is consumed, but input is not
+	}
+
+	if (input_line_idx < input_line.length() && matches(input_line[input_line_idx], pattern, pattern_idx)) {
+		return match_pattern_helper(input_line, pattern, input_line_idx + 1, pattern_idx + 1);
+	}
+
+	return false;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    if (pattern.length() == 1) {
-        return input_line.find(pattern) != std::string::npos;
-    }
-    else if (pattern == "\\d") {
-        return match_digits(input_line, pattern);
-    }
-    else if (pattern == "\\w") {
-        return match_alphanumeric(input_line, pattern);
-    }
-    else if (pattern.front() == '[' && pattern.back() == ']') {
-        std::string trim_pattern = "";
-        if (pattern.size() > 2) {
-            trim_pattern = pattern.substr(1, pattern.size() - 2);
-        }
-        return match_group(input_line, trim_pattern);
-    }
-    else {
-        throw std::runtime_error("Unhandled pattern " + pattern);
-    }
+	return match_pattern_helper(input_line, pattern, 0, 0);
 }
 
 int main(int argc, char* argv[]) {
