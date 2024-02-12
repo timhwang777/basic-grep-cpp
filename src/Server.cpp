@@ -3,6 +3,9 @@
 #include <cctype>
 #include <unordered_set>
 
+bool match_set(char c, const std::string& set, bool negate);
+bool match_here(const std::string& regex, const std::string& text);
+
 bool match_digit(const char c) {
 	return std::isdigit(c);
 }
@@ -11,61 +14,58 @@ bool match_alphanumeric(const char c) {
 	return std::isalnum(c);
 }
 
-bool match_group(const char c, const std::string& pattern, size_t& pattern_idx) {
-	bool negated = pattern[pattern_idx + 1] == '^' ; 
-	bool match = false;
+bool match_group(const std::string& regex, const std::string& text) {
+	if (text.empty()) return false;
 
-	size_t closing_bracket_pos = pattern.find(']', pattern_idx);
-	for (int i = pattern_idx + 1 + negated; i < closing_bracket_pos; i++) {
-		if (c == pattern[i]) {
-			match = true;
-			break;
-		}
-	}
-	pattern_idx = closing_bracket_pos;
-
-	return negated ? !match : match;
-}
-
-bool matches(char c, const std::string& pattern, size_t& pattern_idx) {
-	if (pattern[pattern_idx] == '\\') {
-		if (pattern_idx + 1 < pattern.size()) {
-			pattern_idx++; // Skip the '\';
-			if (pattern[pattern_idx] == 'd') return match_digit(c);
-			if (pattern[pattern_idx] == 'w') return match_alphanumeric(c);
-		}
-	}
-	else if (pattern[pattern_idx] == '[') {
-		return match_group(c, pattern, pattern_idx);
-	}
-	else {
-		return c == pattern[pattern_idx];
+	bool negate = regex[0] == '^';
+	size_t close_bracket_pos = regex.find(']');
+	if (close_bracket_pos == std::string::npos) {
+		throw std::runtime_error("Invalid regex");
 	}
 
-	pattern_idx++; // Move to the next character in the pattern
-	return false;
-}
-
-bool match_pattern_helper(const std::string& input_line, const std::string& pattern, size_t input_line_idx, size_t pattern_idx) {
-	if (input_line_idx == input_line.length() && pattern_idx == pattern.length()) {
-		return true; // Both input and pattern are fully matched
-	}
-	if (pattern_idx == pattern.length()) {
-		return false; // Pattern is consumed, but input is not
-	}
-
-	if (input_line_idx < input_line.length() && matches(input_line[input_line_idx], pattern, pattern_idx)) {
-		return match_pattern_helper(input_line, pattern, input_line_idx + 1, pattern_idx + 1);
+	size_t start = negate ? 1 : 0;
+	if (match_set(text[0], regex.substr(start, close_bracket_pos - start), negate)) {
+		return match_here(regex.substr(close_bracket_pos + 1), text.substr(1));
 	}
 
 	return false;
+}
+
+bool match_set(char c, const std::string& set, bool negate = false) {
+	bool found = set.find(c) != std::string::npos;
+	return negate ? !found : found;
+}
+
+bool match_here(const std::string& regex, const std::string& text) {
+	if (regex.empty()) return true;
+
+    for (size_t i = 0; i < text.size(); ++i) {
+        if ((regex[0] == '.' || regex[0] == text[i]) && match_here(regex.substr(1), text.substr(i + 1))) {
+            return true;
+        }
+
+        if (regex[0] == '\\') {
+            if (regex.size() < 2) {
+                throw std::runtime_error("Invalid regex");
+            }
+            if (regex[1] == 'd' && match_digit(text[i]) && match_here(regex.substr(2), text.substr(i + 1))) {
+                return true;
+            }
+            if (regex[1] == 'w' && match_alphanumeric(text[i]) && match_here(regex.substr(2), text.substr(i + 1))) {
+                return true;
+            }
+        }
+
+        if (regex[0] == '[' && match_group(regex.substr(1), std::string(1, text[i]))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    if (pattern.length() == 1) {
-        return input_line.find(pattern) != std::string::npos;
-    }
-	return match_pattern_helper(input_line, pattern, 0, 0);
+	return match_here(pattern, input_line);
 }
 
 int main(int argc, char* argv[]) {
