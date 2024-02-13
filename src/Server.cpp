@@ -37,6 +37,9 @@ bool match_set(char c, const std::string& set, bool negate = false) {
 }
 
 bool match_here(const std::string& regex, const std::string& text) {
+    if (text.empty()) {
+        return regex.empty() || (regex.size() == 2 && regex[1] == '?');
+    }
 	if (regex.empty()) return true;
 
 	// std::cout << "regex: " << regex << " text: " << text << std::endl;
@@ -50,7 +53,15 @@ bool match_here(const std::string& regex, const std::string& text) {
 	}
 
     for (size_t i = 0; i < text.size(); ++i) {
-        if (regex.size() > 1 && regex[1] == '+') {
+        if (regex.size() > 1 && regex[1] == '?') {
+            if ((regex[0] == text[i] || regex[0] == '.') && match_here(regex.substr(2), text.substr(i + 1))) {
+                return true;
+            }
+            if (match_here(regex.substr(2), text.substr(i))) {
+                return true;
+            }
+        }
+        else if (regex.size() > 1 && regex[1] == '+') {
             if ((regex[0] == text[i] || regex[0] == '.') && (match_here(regex.substr(2), text.substr(i + 1)))) {
                     return true;
             }
