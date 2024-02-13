@@ -40,7 +40,7 @@ bool match_here(const std::string& regex, const std::string& text) {
 	if (regex.empty()) return true;
 
     for (size_t i = 0; i < text.size(); ++i) {
-        if ((regex[0] == '.' || regex[0] == text[i]) && match_here(regex.substr(1), text.substr(i + 1))) {
+        if (regex[0] == text[i] && match_here(regex.substr(1), text.substr(i + 1))) {
             return true;
         }
 
@@ -59,6 +59,10 @@ bool match_here(const std::string& regex, const std::string& text) {
         if (regex[0] == '[' && match_group(regex.substr(1), std::string(1, text[i]))) {
             return true;
         }
+
+		if (regex[0] == '^' && i == 0 && match_here(regex.substr(1), text.substr(i))) {
+			return true;
+		}
     }
 
     return false;
