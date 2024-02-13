@@ -45,6 +45,10 @@ bool match_here(const std::string& regex, const std::string& text) {
 		return match_here(regex.substr(1), text.substr(0, regex.size() - 1));
 	}
 
+	if (regex[regex.size() - 1] == '$') {
+		return match_here(regex.substr(0, regex.size() - 1), text.substr(text.size() - regex.size() + 1));
+	}
+
     for (size_t i = 0; i < text.size(); ++i) {
         if (regex[0] == text[i] && match_here(regex.substr(1), text.substr(i + 1))) {
             return true;
