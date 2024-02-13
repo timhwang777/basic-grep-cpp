@@ -36,6 +36,19 @@ bool match_set(char c, const std::string& set, bool negate = false) {
 	return negate ? !found : found;
 }
 
+bool alternate(const std::string& regex, const std::string& text) {
+    size_t clost_bracket_pos = regex.find(')');
+    size_t pipe_pos = regex.find('|');
+    if (clost_bracket_pos == std::string::npos || pipe_pos == std::string::npos) {
+        throw std::runtime_error("Invalid regex");
+    }
+
+    std::string alter1 = regex.substr(0, pipe_pos - 1);
+    std::string alter2 = regex.substr(pipe_pos + 1, clost_bracket_pos - pipe_pos - 1);
+
+    return match_here(alter1, text) || match_here(alter2, text);
+}
+
 bool match_here(const std::string& regex, const std::string& text) {
     if (text.empty()) {
         return regex.empty() || (regex.size() == 2 && regex[1] == '?');
@@ -83,6 +96,10 @@ bool match_here(const std::string& regex, const std::string& text) {
         }
 
         if (regex[0] == '[' && match_group(regex.substr(1), std::string(1, text[i]))) {
+            return true;
+        }
+
+        if (regex[0] == '(' && alternate(regex.substr(1), text.substr(i))) {
             return true;
         }
     }
