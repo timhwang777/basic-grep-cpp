@@ -50,7 +50,12 @@ bool match_here(const std::string& regex, const std::string& text) {
 	}
 
     for (size_t i = 0; i < text.size(); ++i) {
-        if (regex[0] == text[i] && match_here(regex.substr(1), text.substr(i + 1))) {
+        if (regex.size() > 1 && regex[1] == '+') {
+            if ((regex[0] == text[i] || regex[0] == '.') && (match_here(regex.substr(2), text.substr(i + 1)))) {
+                    return true;
+            }
+        }
+        else if ((regex[0] == text[i] || regex[0] == '.') && match_here(regex.substr(1), text.substr(i + 1))) {
             return true;
         }
 
