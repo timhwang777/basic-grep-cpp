@@ -1,39 +1,33 @@
-[![progress-banner](https://backend.codecrafters.io/progress/grep/9f463b41-3f73-4b38-b268-f254a3522f7e)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Basic GREP in C++
 
-This is a starting point for C++ solutions to the
-["Build Your Own grep" Challenge](https://app.codecrafters.io/courses/grep/overview).
+![Static Badge](https://img.shields.io/badge/C%2B%2B-Solutions-blue?logo=C%2B%2B)
 
-[Regular expressions](https://en.wikipedia.org/wiki/Regular_expression)
-(Regexes, for short) are patterns used to match character combinations in
-strings. [`grep`](https://en.wikipedia.org/wiki/Grep) is a CLI tool for
-searching using Regexes.
+## Table of Contents
+1. [About the Project](#about-the-project)
+2. [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+3. [Author](#author)
 
-In this challenge you'll build your own implementation of `grep`. Along the way
-we'll learn about Regex syntax, how parsers/lexers work, and how regular
-expressions are evaluated.
+## About the Project
+This project is a simple implementation of a Regular Expression (regex) matcher in C++. It provides a command-line interface for matching input strings against a given regex pattern. The regex engine supports a subset of the standard regex features, including:
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+- Literal characters
+- The wildcard character `.`
+- Character classes `[]`
+- Start and end of line anchors `^` and `$`
+- Grouping and alternation `|`
+- Quantifiers `?`, `+`
+- Escape sequences `\d`, `\w`
 
-# Passing the first stage
+## Getting Started
+To get a local copy up and running, follow these simple steps:
 
-The entry point for your `grep` implementation is in `src/Server.cpp`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+1. Clone the repo
+2. Compile the C++ file using a C++ compiler (e.g., g++)
+3. Run the compiled program from the command line, passing the -E flag and your regex pattern as arguments.
 
-```sh
-git add .
-git commit -m "pass 1st stage" # any msg
-git push origin master
-```
+### Prerequisites
+This project is written in C++ and requires a C++ compiler. The code is compatible with C++11 and later versions.
 
-Time to move on to the next stage!
-
-# Stage 2 & beyond
-
-Note: This section is for stages 2 and beyond.
-
-1. Ensure you have `cmake` installed locally
-1. Run `./your_grep.sh` to run your program, which is implemented in
-   `src/Server.cpp`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+## Author
+Timothy Hwang
